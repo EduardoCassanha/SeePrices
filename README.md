@@ -12,7 +12,7 @@ A console-based stock price monitor built in C# that integrates with financial A
 
 - Near Real-Time Monitoring: Polls live stock prices from the [Brapi API](https://brapi.dev/) at 30-second intervals.
 - Secure Secrets Management: Uses .NET User Secrets to ensure API tokens are never exposed in the source code.
-- Error Handling: Gracefully handles network issues and invalid stock tickers (HTTP 404).
+- Error Handling: Handles network issues and invalid stock tickers (HTTP 404).
 - Input Validation: Validates stock symbols and target prices before monitoring begins.
 - Audio Alerts: Emits an audible alert when the target price is reached (Windows only).
 
@@ -26,12 +26,18 @@ This project follows industry best practices for secret management by isolating 
 - System.Text.Json for high-performance JSON serialization.
 - Microsoft.Extensions.Configuration for secure configuration and secret handling.
 
+## Design Notes
+
+- Uses polling instead of WebSockets due to API limitations.
+- Console-based by design to emphasize core C# and .NET fundamentals.
+- Secrets are managed locally using .NET User Secrets to avoid credential exposure.
+
 ## Roadmap
 
-- [ ] Persist monitoring logs to local files.
-- [ ] Improve graceful shutdown handling (Ctrl + C).
+- [x] Persist monitoring logs to local files.
+- [x] Improve graceful shutdown handling (Ctrl + C).
 - [ ] Refactor API communication into a dedicated service layer.
-SS
+
 ## Getting Started
 
 ### Prerequisites

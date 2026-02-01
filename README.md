@@ -1,60 +1,93 @@
 ﻿# SeePrices
-
-![SeePrices Demo](./assets/seeprices.png)
-
 ![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
 ![.NET 10](https://img.shields.io/badge/.NET%2010-512BD4?style=for-the-badge&logo=.net&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Functional-brightgreen?style=for-the-badge)
 
-A console-based stock price monitor built in C# that integrates with financial APIs to track B3 (Brazilian Stock Exchange) assets. The project emphasizes asynchronous HTTP communication, secure credential management, and clean input validation.
+**SeePrices** is a C# .NET 10 console application designed to monitor Brazilian stock prices (B3) in real-time and trigger alerts when target prices are reached.
 
-## Features
+This project was built as a practical learning exercise focused on API consumption, modular architecture, culture-aware formatting, secure secret management, and persistent logging.
 
-- Near Real-Time Monitoring: Polls live stock prices from the [Brapi API](https://brapi.dev/) at 30-second intervals.
-- Secure Secrets Management: Uses .NET User Secrets to ensure API tokens are never exposed in the source code.
-- Error Handling: Gracefully handles network issues and invalid stock tickers (HTTP 404).
-- Input Validation: Validates stock symbols and target prices before monitoring begins.
-- Audio Alerts: Emits an audible alert when the target price is reached (Windows only).
+## 🚀 Features
 
-## Security & Best Practices
+- **Real-time monitoring**: Fetches stock prices every 30 seconds via [Brapi API](https://brapi.dev/)
+- **Price alerts**: Audible notification when target is reached (Windows only)
+- **Persistent logging**: All events are logged to timestamped files in the `logs/` directory
+- **Brazilian culture support**: Currency (BRL), decimals, and date formatting in pt-BR
+- **Secure credentials**: API tokens managed via .NET User Secrets (never exposed in code)
+- **Input validation**: Regex-based ticker validation and culture-aware price parsing
+- **Graceful shutdown**: Proper Ctrl+C handling with final log persistence
 
-This project follows industry best practices for secret management by isolating credentials from source code. API tokens are stored locally using the .NET Secret Manager, making the repository safe for public display.
+## 🏗️ Project Structure
+```
+SeePrices/
+├── Program.cs              # Entry point & monitoring loop
+├── Models/
+│   └── BrapiModels.cs      # API response DTOs
+├── Services/
+│   ├── Logger.cs           # File-based logging system
+│   └── StockMonitor.cs     # Price validation & alert handling
+└── logs/                   # Auto-generated log files (gitignored)
+```
 
-## Technologies
+## 🛠️ Technologies
 
-- C# / .NET 10
-- System.Text.Json for high-performance JSON serialization.
-- Microsoft.Extensions.Configuration for secure configuration and secret handling.
+- **C# / .NET 10**
+- **System.Text.Json** for high-performance JSON deserialization
+- **Microsoft.Extensions.Configuration** for User Secrets integration
+- **HttpClient** with async/await for non-blocking API calls
+- **Regex** for ticker format validation
+- **CultureInfo** for pt-BR numeric and currency handling
 
-## Roadmap
-
-- [ ] Persist monitoring logs to local files.
-- [x] Improve graceful shutdown handling (Ctrl + C).
-- [ ] Refactor API communication into a dedicated service layer.
-SS
-## Getting Started
+## ⚙️ Getting Started
 
 ### Prerequisites
-- .NET 10 SDK
-- Free API token from [Brapi](https://brapi.dev/)
+- .NET 10 SDK or higher
+- Free API token from [Brapi.dev](https://brapi.dev/)
 
 ### Installation
-1. Clone the repository
 ```bash
-   git clone https://github.com/EduardoCassanha/seeprices.git
-   cd seeprices
+# Clone the repository
+git clone https://github.com/EduardoCassanha/seeprices.git
+cd seeprices
+
+# Configure your API token securely
+dotnet user-secrets init
+dotnet user-secrets set "BrapiToken" "YOUR_TOKEN_HERE"
+
+# Run the application
+dotnet run
 ```
 
-2. Configure your API token
-```bash
-   dotnet user-secrets init
-   dotnet user-secrets set "BrapiToken" "your-token-here"
+### Usage Example
+```
+- SeePrices: Stock Monitor -
+Enter the stock ticker (e.g., PETR4): VALE3
+Enter your target price: 65,50
+
+--- SeePrices: Monitoring VALE3 ---
+Target Price: R$ 65,50 | Press Ctrl+C to stop
+---------------------------------------------
+[14:23:15] VALE3 | Preço: R$ 67,32
+Status: Target price not reached. Monitoring...
+Next update in 30s...
 ```
 
-3. Run the application
-```bash
-   dotnet run
-```
+## 🗺️ Roadmap
 
-## License
-MIT License - feel free to use this project for learning purposes.
+- [x] ~~Persist monitoring logs to local files~~ ✅ Implemented
+- [x] ~~Extract API communication into dedicated service~~ ✅ Implemented
+- [ ] Support monitoring multiple tickers simultaneously
+- [ ] Add CSV export for historical price data
+- [ ] Implement WebSocket for real-time updates (reduce API calls)
+
+## 🔒 Security Note
+
+This project uses .NET User Secrets to keep API tokens out of source control. Never commit your `BrapiToken` or any credentials to version control.
+
+## 📄 License
+
+MIT License — feel free to use this project for learning purposes.
+
+---
+
+**Built with 💙 by [Eduardo Cassanha](https://github.com/EduardoCassanha)**

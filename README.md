@@ -1,26 +1,60 @@
 ﻿# SeePrices
 
+![SeePrices Demo](./assets/seeprices.png)
+
 ![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
 ![.NET 10](https://img.shields.io/badge/.NET%2010-512BD4?style=for-the-badge&logo=.net&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Functional-brightgreen?style=for-the-badge)
 
-A real-time stock monitor built in C# that integrates with financial APIs to track B3 (Brazilian Stock Exchange) assets. This project focuses on asynchronous programming, secure credential management, and resilient error handling.
+A console-based stock price monitor built in C# that integrates with financial APIs to track B3 (Brazilian Stock Exchange) assets. The project emphasizes asynchronous HTTP communication, secure credential management, and clean input validation.
 
 ## Features
-* Real-Time Data: Fetches live prices directly from the [Brapi API](https://brapi.dev/).
-* Secure Secrets: Implements *.NET User Secrets* to ensure API tokens are never exposed in the source code.
-* Resilient Logic: Includes custom `try-catch` filters to handle network issues and invalid tickers (HTTP 404).
-* Smart Validation: Robust input handling for target prices and stock symbols.
+
+- Near Real-Time Monitoring: Polls live stock prices from the [Brapi API](https://brapi.dev/) at 30-second intervals.
+- Secure Secrets Management: Uses .NET User Secrets to ensure API tokens are never exposed in the source code.
+- Error Handling: Gracefully handles network issues and invalid stock tickers (HTTP 404).
+- Input Validation: Validates stock symbols and target prices before monitoring begins.
+- Audio Alerts: Emits an audible alert when the target price is reached (Windows only).
 
 ## Security & Best Practices
-Following professional standards, this project separates logic from credentials. *API Tokens are stored locally using the Secret Manager*, keeping the repository safe for public display and contribution.
+
+This project follows industry best practices for secret management by isolating credentials from source code. API tokens are stored locally using the .NET Secret Manager, making the repository safe for public display.
 
 ## Technologies
-* C# / .NET 10
-* System.Text.Json For high-performance data processing.
-* Microsoft.Extensions.Configuration: To manage secure user secrets.
+
+- C# / .NET 10
+- System.Text.Json for high-performance JSON serialization.
+- Microsoft.Extensions.Configuration for secure configuration and secret handling.
 
 ## Roadmap
-- [ ] Implement a *Watchdog Loop* for automatic updates every 30 seconds.
-- [ ] Add *Audio Alerts* using `Console.Beep` when target prices are reached.
-- [ ] Export monitoring logs to local files.
+
+- [ ] Persist monitoring logs to local files.
+- [ ] Improve graceful shutdown handling (Ctrl + C).
+- [ ] Refactor API communication into a dedicated service layer.
+SS
+## Getting Started
+
+### Prerequisites
+- .NET 10 SDK
+- Free API token from [Brapi](https://brapi.dev/)
+
+### Installation
+1. Clone the repository
+```bash
+   git clone https://github.com/EduardoCassanha/seeprices.git
+   cd seeprices
+```
+
+2. Configure your API token
+```bash
+   dotnet user-secrets init
+   dotnet user-secrets set "BrapiToken" "your-token-here"
+```
+
+3. Run the application
+```bash
+   dotnet run
+```
+
+## License
+MIT License - feel free to use this project for learning purposes.

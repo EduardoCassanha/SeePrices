@@ -1,12 +1,34 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
-using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 
 // Data entry
 Console.WriteLine("- SeePrices: Stock Monitor -");
-Console.Write("Enter the stock ticker (e.g., PETR4):");
-string ticker = Console.ReadLine()?.ToUpper() ?? "PETR4";
+
+Console.CancelKeyPress += (s, e) =>
+{
+    e.Cancel = true;
+    Console.WriteLine("\nMonitoring session terminated.");
+    Environment.Exit(0);
+};
+
+string ticker;
+string pattern = @"^[A-Z]{4}[0-9]{1,2}$";
+
+while (true)
+{
+    Console.Write("Enter the stock ticker (e.g., PETR4):");
+    ticker = Console.ReadLine()?.ToUpper() ?? "";
+    
+    if (Regex.IsMatch(ticker, pattern))
+    {
+        break;
+    }
+
+    Console.WriteLine("Invalid format. Please use 4 letters and 1 or 2 numbers (Ex: VALE3).");
+}
 
 decimal targetPrice = GetTargetPrice();
 
@@ -25,39 +47,49 @@ if (string.IsNullOrEmpty(token))
 
 // API request
 using HttpClient client = new HttpClient();
+client.Timeout = TimeSpan.FromSeconds(10);
 
-try
+while (true)
 {
+    Console.Clear();
+    Console.WriteLine($"--- SeePrices: Monitoring {ticker} ---");
+    Console.WriteLine($"Target Price: {targetPrice:C} | Press Ctrl+C to stop");
+    Console.WriteLine("---------------------------------------------");
 
-    string url = $"https://brapi.dev/api/quote/{ticker}?token={token}";
-    string jsonResponse = await client.GetStringAsync(url);
-    var data = JsonSerializer.Deserialize<BrapiResponse>(jsonResponse);
+    try
+    {
 
-    if (data?.results != null && data.results.Count > 0)
-    {
-        decimal currentPrice = data.results[0].regularMarketPrice;
+        string url = $"https://brapi.dev/api/quote/{ticker}?token={token}";
+        string jsonResponse = await client.GetStringAsync(url);
+        var data = JsonSerializer.Deserialize<BrapiResponse>(jsonResponse);
 
-        Console.WriteLine($"\nSuccess! Monitoring {ticker}");
-        Console.WriteLine($"Target: {targetPrice:C} | Current: {currentPrice:C}");
-        Console.WriteLine("------------------------------");
+        if (data?.results != null && data.results.Count > 0)
+        {
+            decimal currentPrice = data.results[0].regularMarketPrice;
 
-        ProcessAlert(ticker, targetPrice, currentPrice);
+            // Actual price with last update
+            Console.WriteLine($"[{DateTime.Now:dd/MM/yy HH:mm:ss}] Current Price: {currentPrice:C}");
+
+            ProcessAlert(ticker, targetPrice, currentPrice);
+        }
     }
-    else
+    catch (HttpRequestException ex)
     {
-        Console.WriteLine("Error: Stock data not found.");
+        if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            Console.WriteLine($"\nError: The ticker '{ticker}' was not found on B3.");
+        }
+        else
+        {
+            Console.WriteLine("Connection error: Please check your internet or API token.");
+        }
     }
-}
-catch (HttpRequestException ex)
-{
-    if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+    for (int i = 30; i > 0; i--)
     {
-        Console.WriteLine($"\nError: The ticker '{ticker}' was not found on B3.");
+        Console.Write($"\rNext update in {i:D2}s...");
+        await Task.Delay(1000);
     }
-    else
-    {
-        Console.WriteLine("Connection error: Please check your internet or API token.");
-    }
+
 }
 
 // Definitions
@@ -66,32 +98,35 @@ decimal GetTargetPrice()
     while (true)
     {
         Console.Write("Enter your target price: ");
-        if (decimal.TryParse(Console.ReadLine(), out decimal price))
+        string? input = Console.ReadLine();
+
+        if (decimal.TryParse(input, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal price))
             return price;
 
-        Console.WriteLine("Invalid entry. Please use numeric values (e.g., 15.50).");
+        Console.WriteLine("Invalid price format.");
     }
 }
 
 void ProcessAlert(string tickerSymbol, decimal target, decimal current)
 {
-    Console.WriteLine($"\n-- Checking {tickerSymbol} --");
-    Console.WriteLine($"Current Price: {current:C}");
-    Console.WriteLine($"Target price: {target:C}");
-
     if (current <= target)
     {
         Console.WriteLine("ALERT: Time to buy!");
+
+        if (OperatingSystem.IsWindows())
+        {
+            Console.Beep(1000, 800); // Triggers a beep
+        }
     }
     else
     {
-        Console.WriteLine("Status: Waiting...");
+        Console.WriteLine("Status: Target price not reached. Monitoring...");
     }
 }
 
 public class BrapiResponse
 {
-    public List<StockResult> results { get; set; }
+    public List<StockResult>? results { get; set; }
 }
 public class StockResult
 {

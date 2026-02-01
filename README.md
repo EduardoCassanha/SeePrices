@@ -29,7 +29,7 @@ This project follows industry best practices for secret management by isolating 
 ## Roadmap
 
 - [ ] Persist monitoring logs to local files.
-- [ ] Improve graceful shutdown handling (Ctrl + C).
+- [x] Improve graceful shutdown handling (Ctrl + C).
 - [ ] Refactor API communication into a dedicated service layer.
 SS
 ## Getting Started

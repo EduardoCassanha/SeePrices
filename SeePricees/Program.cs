@@ -60,7 +60,7 @@ catch (HttpRequestException ex)
     }
 }
 
-// DEFINITIONS
+// Definitions
 decimal GetTargetPrice()
 {
     while (true)
